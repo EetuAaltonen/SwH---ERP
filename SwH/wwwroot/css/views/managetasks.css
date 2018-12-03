@@ -1,0 +1,13 @@
+﻿#fromContainer {
+    width: 400px;
+    margin: auto;
+    padding: 20px 10px;
+}
+
+.fullWidth {
+    width: 100%;
+}
+
+.btnBottomMargin {
+    margin-bottom: 10px !important;
+}

@@ -1,0 +1,49 @@
+﻿@model SwH.Models.ManageProjectsViewModel
+
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="/css/views/manageprojects.css">
+
+<div id="fromContainer">
+    <h1>Head-roolissa oleva voi lisätä projekteja</h1>
+    
+    @Html.Partial("~/Views/InfoMessage.cshtml")
+
+    @using (Html.BeginForm("ManageProjects", "Project"))
+    {
+        @Html.AntiForgeryToken()
+        <div class="ui form">
+            <div class="required field">
+                <label>Name</label>
+                <input type="text" name="projectName" required autofocus>
+            </div>
+            <div class="required field">
+                <label>Manager</label>
+                <div id="dropDownManager" class="ui fluid search selection dropdown">
+                    <input type="hidden" name="managerid">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select manager</div>
+                    <div class="menu">
+                        @if (Model != null)
+                        {
+                            @foreach (var user in Model.Managers)
+                            {
+                                <div class="item" data-value=@user.Id>@user.LastName @user.FirstName</div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="required field">
+                <label>Expires</label>
+                <input type="date" name="expires" required>
+            </div>
+            <button class="ui button primary fullWidth btnBottomMargin" type="submit">Add new Project</button>
+        </div>
+    }
+</div>
+
+<script>
+    $('#dropDownManager').dropdown({
+        onChange: function(value, text, $choice){
+    }});
+</script>

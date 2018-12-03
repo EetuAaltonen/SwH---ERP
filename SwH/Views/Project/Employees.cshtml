@@ -1,0 +1,76 @@
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="/css/views/employees.css">
+
+<h1 class="ui header">Kaikki työntekijät</h1>
+<div class="ui one column grid">
+    <div class="column">
+    <div class="ui segment">
+        <h3 class="ui header"><i class="group icon"></i>Employees</h3>
+        
+        @Html.Partial("~/Views/InfoMessage.cshtml")
+
+        <div class="ui grid headerColumn">
+            <div class="three column row headerRow">
+                <div class="column">Last Name</div>
+                <div class="column">First Name</div>
+                <div class="column">Role</div>
+            </div>
+        </div>
+        <div id="employees" class="ui middle aligned divided list employeeList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+    $( document ).ready(function() {
+
+        var employees = @Html.Raw(Json.Serialize(@ViewData["Employees"]));
+
+        generateEmployees();
+        function generateEmployees() {
+            let list = $("#employees");
+            $.each(employees, function( i, u )
+            {
+                //Item
+                let projectItem = $("<div/>")
+                    .addClass("item listItem")
+                    .appendTo(list);
+                //Grid
+                let projectGrid = $("<div/>")
+                    .addClass("ui grid")
+                    .appendTo(projectItem);
+                //Column Row
+                let columnRow = $("<div/>")
+                    .addClass("three column row")
+                    .appendTo(projectGrid);
+                //First Column
+                let frstCol = $("<div/>")
+                    .addClass("column")
+                    .appendTo(columnRow);
+                //Last Name
+                let lastName = $("<h4/>")
+                    .addClass("column")
+                    .text(u.lastName)
+                    .appendTo(frstCol);
+                //Second Column
+                let scnd = $("<div/>")
+                    .addClass("column")
+                    .appendTo(columnRow);
+                //First Name
+                let firstName = $("<p/>")
+                    .addClass("column")
+                    .text(u.firstName)
+                    .appendTo(scnd);
+                //Third Column
+                let thrd = $("<div/>")
+                    .addClass("column")
+                    .appendTo(columnRow);
+                //Role
+                let role = $("<p/>")
+                    .addClass("column")
+                    .text(u.role)
+                    .appendTo(thrd);
+            });
+        }
+    });
+</script>

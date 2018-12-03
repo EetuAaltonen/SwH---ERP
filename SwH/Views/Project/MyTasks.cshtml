@@ -1,0 +1,213 @@
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="/css/views/mytasks.css">
+
+<h1 class="ui header">Työntekijän tehtävät</h1>
+<div class="ui one column grid">
+    <div class="column">
+    <div class="ui segment">
+        <h3 class="ui header"><i class="unordered list icon"></i>My Tasks</h3>
+        
+        @Html.Partial("~/Views/InfoMessage.cshtml")
+
+        <div class="ui grid headerColumn">
+            <div class="five column row headerRow">
+                <div class="column">Name</div>
+                <div class="column">Description</div>
+                <div class="column">Project</div>
+                <div class="column">Expires</div>
+                <div class="column">Actions</div>
+            </div>
+        </div>
+        <div id="myTasks" class="ui middle aligned divided list taskList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+    $( document ).ready(function() {
+        
+        var myTasks = @Html.Raw(Json.Serialize(@ViewData["MyTasks"]));
+        
+        generateTasks2();
+        function generateTasks2() {
+            let list = $("#myTasks");
+            $.each(myTasks, function( i, task )
+            {
+                //Item
+                let taskItem = $("<div/>")
+                    .addClass("item listItem")
+                    .appendTo(list);
+                    if (task.status == "In Progress") {
+                        taskItem.addClass("task-progress");
+                    } else if (task.status == "Paused") {
+                        taskItem.addClass("task-paused");
+                    } else {
+                        taskItem.addClass("task-queue");
+                    }
+                //Id
+                var id = $("<input/>")
+                    .attr({"type":"hidden", "value":task.id})
+                    .appendTo(taskItem);
+                //Grid
+                let taskGrid = $("<div/>")
+                    .addClass("ui grid")
+                    .appendTo(taskItem);
+                //Column Row
+                let columnRow = $("<div/>")
+                    .addClass("five column row")
+                    .appendTo(taskGrid);
+                //First Column
+                let frstCol = $("<div/>")
+                    .addClass("column")
+                    .appendTo(columnRow);
+                //Task Name
+                let taskName = $("<h4/>")
+                    .addClass("ui header")
+                    .text(task.name)
+                    .appendTo(frstCol);
+                //Second Column
+                let scnd = $("<div/>")
+                    .addClass("column")
+                    .appendTo(columnRow);
+                //Task Description
+                let descr = $("<p/>")
+                    .addClass("column")
+                    .text(task.descr)
+                    .appendTo(scnd);
+                //Third Column
+                let thrd = $("<div/>")
+                    .addClass("column")
+                    .appendTo(columnRow);
+                //Project
+                let project = $("<p/>")
+                    .text(task.project)
+                    .appendTo(thrd);
+                //Fourth Column
+                let frth = $("<div/>")
+                    .addClass("column")
+                    .appendTo(columnRow);
+                //Expire
+                let date = task.expires.substr(0, task.expires.indexOf('T')).split("-");
+                let expire = $("<p/>")
+                    .addClass("column")
+                    .text(date[2] + "." + date[1] + "." + date[0])
+                    .appendTo(frth);
+                //Fifth Column
+                let fifth = $("<div/>")
+                    .addClass("column")
+                    .appendTo(columnRow);
+                    generateButtons(fifth, task);
+            });
+        }
+
+        function generateButtons(target, task) {
+            target.empty();
+            if (task.status == "Queue") {
+                //Queue Button
+                let queue = $("<button/>")
+                    .addClass("positive ui button")
+                    .attr({
+                        "value":"In Progress",
+                        "data-content":"Mark as in progress",
+                        "data-position":"top center",
+                        "data-variation":"basic"
+                    })
+                    .on("click", changeTaskStatus)
+                    .appendTo(target);
+                //Icon
+                let icon1 = $("<i/>")
+                    .addClass("play icon")
+                    .appendTo(queue);
+            } else {
+                //Done Button
+                let done = $("<button/>")
+                    .addClass("ui positive button")
+                    .attr({
+                        "value":"Done",
+                        "data-content":"Mark as done",
+                        "data-position":"top center",
+                        "data-variation":"basic"
+                    })
+                    .on("click", changeTaskStatus)
+                    .appendTo(target);
+                //Icon
+                let icon1 = $("<i/>")
+                    .addClass("check icon")
+                    .appendTo(done);
+                //Pause / Resume Button
+                let pause = $("<button/>")
+                    .addClass("ui orange button")
+                    .on("click", changeTaskStatus)
+                    .appendTo(target);
+                //Icon
+                icon2 = $("<i/>").appendTo(pause);
+                if (task.status == "Paused") {
+                    icon2.addClass("play icon");
+                    pause.attr({
+                        "value":"In Progress",
+                        "data-content":"Resume task",
+                        "data-position":"top center",
+                        "data-variation":"basic"
+                    })
+                } else {
+                    icon2.addClass("pause icon");
+                    pause.attr({
+                        "value":"Paused",
+                        "data-content":"Pause task",
+                        "data-position":"top center",
+                        "data-variation":"basic"
+                    })
+                }
+            }
+        }
+
+        function changeTaskStatus(event) {
+            let button = $(event.currentTarget);
+            let listItem = button.parents(".listItem");
+            let column = button.parent(".column");
+            let taskId = listItem.find("input").val();
+            let status = button.val();
+            
+            var requestData = {
+                Id: taskId,
+                Status: status
+            };
+            
+            $.ajax({
+                cache: false,
+                async: true,
+                type: "POST",
+                url: "/Project/ChangeTaskStatus",
+                data: JSON.stringify(requestData),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: function(data) {
+                    if (data.success) {
+                        switch (status) {
+                            case "In Progress": {
+                                listItem.removeClass("task-queue").removeClass("task-paused").addClass("task-progress");
+                            }break;
+                            case "Paused": {
+                                listItem.removeClass("task-progress").addClass("task-paused");
+                            }break;
+                            case "Done": {
+                                listItem.remove();
+                            }break;
+                        }
+                        generateButtons(column, {id: taskId, status: status});
+                    } else {
+                        alert(data.message);
+                    }
+                },
+                error: function(data) {
+                    alert("Something went wrong");
+                } 
+            });
+        }
+
+        //Button Popup
+        $('.ui.button').popup({
+            on: 'hover'
+        });
+    });
+</script>

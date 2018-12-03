@@ -1,0 +1,42 @@
+﻿.headerColumn {
+    padding-right: 1.5em !important;
+}
+.headerRow {
+    padding-bottom: 0.5em !important;
+    text-decoration: underline;
+}
+
+.listItem{
+    padding: 0.3em 0.5em 0.3em 0 !important;
+    margin: 2px 0 !important;
+    background-color: #99d3e8 !important;
+    border: solid 1px rgba(34, 36, 38, 0.15) !important;
+    border-radius: 0.2em !important;
+}
+
+.items .item {
+    margin: 2px;
+    padding: 2px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.ui.list>.item>i.icon {
+    padding: .28em 0 0 0 !important;
+    color: darkslategray;
+    font-size: 2.8em !important;
+}
+
+.employeeList {
+    margin: 1em 0 !important;
+    padding-right: 0.5em !important;
+    border-top: solid 1px rgba(34, 36, 38, 0.15);
+    border-bottom: solid 1px rgba(34, 36, 38, 0.15);
+    min-height: 5em;
+    max-height: 20em;
+    overflow-y: scroll;
+}
+
+.row {
+    margin: 0 !important;
+}

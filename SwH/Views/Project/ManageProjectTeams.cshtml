@@ -1,0 +1,314 @@
+﻿@model SwH.Models.ManageTasksViewModel
+
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="/css/views/manageprojectteams.css">
+
+<div id="projectTeamContainer">
+    <h1>Manager-roolissa oleva voi laatia projektitiimejä</h1>
+
+    @Html.Partial("~/Views/InfoMessage.cshtml")
+
+    <div id="changesSaved" class="ui positive message" style="display: none;">
+        <div class="header">
+            Changes saved
+        </div>
+    </div>
+    <div id="error" class="ui negative message" style="display: none;">
+        <div class="header">
+            Something went wrong
+        </div>
+    </div>
+    
+    <div id="projectsDrop" class="ui selection dropdown">
+        <input id="selectedProjectVal" type="hidden">
+        <i class="dropdown icon"></i>
+        <div id="selectedProject" class="default text">No Projects</div>
+        <div id="projectsDropdown" class="menu"></div>
+    </div>
+    <br><br>
+
+    <table class="ui celled table member-table">
+    <thead>
+        <tr><th><h3 class="ui header">Available Employees</h3></th>
+        <th><h3 class="ui header">Assigned To Project</h3></th>
+    </tr></thead>
+    <tbody>
+        <tr>
+            <td data-label="">
+                <div class="ui input search-box">
+                    <input id="search1" type="text" placeholder="Search available...">
+                </div>
+                <div id="items1" class="ui vertical list items"></div>
+            </td>
+            <td data-label="">
+                <div class="ui input search-box">
+                    <input id="search2" type="text" placeholder="Search assigned...">
+                </div>
+                <div id="items2" class="ui vertical list items"></div>
+            </td>
+        </tr>
+    </tbody>
+    </table>
+    <br>
+    <button id="saveButton" class="ui button primary">Save Changes</button>
+</div>
+
+<script src="/js/jquery-ui.min.js" asp-append-version="true"></script>
+<script src="/js/jquery.ui.touch-punch.min.js" asp-append-version="true"></script>
+<script src="/js/chartist.min.js"></script>
+<script src="/js/chart.bundle.js"></script>
+
+<script>
+    var items1 = $("#items1");
+    var items2 = $("#items2");
+
+    var searchTemp1 = "NULL";
+    var searchTemp2 = "NULL";
+
+    var origEmployees = @Html.Raw(Json.Serialize(@ViewData["Employees"]));
+    var origTeamMembers = @Html.Raw(Json.Serialize(@ViewData["TeamMembers"]));
+    var employees = origEmployees.slice();
+    var teamMembers = origTeamMembers.slice();
+
+    $( document ).ready(function() {
+        var projects = @Html.Raw(Json.Serialize(@ViewData["Projects"]));
+        generateProjectDropdown();    
+        function generateProjectDropdown() {
+            let options = "";
+            var dropdown = $("#projectsDropdown");
+            $.each(projects, function( i, project )
+            {
+                let option = $("<div/>")
+                    .addClass("item")
+                    .attr("data-value", project.id)
+                    .text(project.name);
+                if (i == 0) {
+                    $("#selectedProject").removeClass("default");
+                    $("#selectedProject").text(project.name);
+                    option.addClass("active").addClass("selected");
+                    $("#selectedProjectVal").attr("value", project.id);
+                }
+                option.appendTo(dropdown);
+            });
+            RemoveTeamMemberDuplicates();
+            RemoveEmployeeTeamMemberDuplicates();
+            generateEmployees();
+        }
+
+        $("#search1").keyup(function(){
+            generateEmployees();
+        });
+
+        $("#search2").keyup(function(){
+            generateEmployees();
+        });
+        $(function () {
+            $("#items1,#items2").sortable({
+                connectWith: "#items1,#items2",
+                start: function (event, ui) {
+                    //ui.item.toggleClass("highlight");
+                },
+                stop: function (event, ui) {
+                    let droppedIn = ui.item[0].parentNode.id;
+                    let emp = ui.item[0].innerText.split("\n");
+                    let firstName = (emp[0].split(" "))[0];
+                    let lastName = (emp[0].split(" "))[1];
+                    let role = emp[1];
+                    let userId = parseInt(ui.item.find("input").val());
+                    let projectId = parseInt($('#projectsDrop').find("input").val());
+                    if (this.id != droppedIn) {
+                        if (this.id == "items1") {
+                            employees = jQuery.grep(employees, function(value) {
+                                return (value.firstName != firstName && value.lastName != lastName);
+                            });
+                            teamMembers.push({"id":userId,"projectId":projectId,"firstName":firstName,"lastName":lastName, "role":role});
+                        } else {
+                            teamMembers = jQuery.grep(teamMembers, function(value) {
+                                return (value.firstName != firstName && value.lastName != lastName);
+                            });
+                            employees.push({"id":userId,"firstName":firstName,"lastName":lastName, "role":role});
+                        }
+                    }
+                }
+            });
+            $("#items1,#items2").disableSelection();
+        });
+    });
+
+    //Dropdown
+    $('#projectsDrop').change(function() {
+        employees = origEmployees.slice();
+        teamMembers = origTeamMembers.slice();
+        RemoveTeamMemberDuplicates();
+        RemoveEmployeeTeamMemberDuplicates();
+
+        searchTemp1 = "NULL";
+        searchTemp2 = "NULL";
+        generateEmployees();
+
+        $('#changesSaved').css("display", "none");
+        $('#error').css("display", "none");
+    });
+
+    function RemoveEmployeeTeamMemberDuplicates() {
+        var array = new Array();
+        for (let i = 0; i < employees.length; i++) {
+            let keep = true;
+            for (let j = 0; j < teamMembers.length; j++) {
+                if (employees[i].id == teamMembers[j].id) {
+                    keep = false;
+                }
+            }
+            if (keep) {
+                array.push(employees[i]);
+            }
+        }
+        employees = array;
+    }
+
+    function RemoveTeamMemberDuplicates() {
+        teamMembers = jQuery.grep(teamMembers, function(value) {
+            let index = $("#selectedProjectVal").val();
+            return (value.projectId == index);
+        });
+    }
+
+    function generateEmployees() {
+        let index = $("#selectedProjectVal").val();
+
+        let input, array, list;
+        let generateList;
+        for (let i = 0; i <= 1; i++) {
+            generateList = false;
+            switch(i) {
+                case 0: {
+                    input = $('#search1').val().toLowerCase();
+                    if (input != searchTemp1) {
+                        items1.empty();
+                        input = input.toLowerCase();
+                        array = employees;
+                        list = items1;
+                        generateList = true;
+                    }
+                    searchTemp1 = $('#search1').val();
+                }break;
+                case 1: {
+                    input = $('#search2').val();
+                    if (input != searchTemp2) {
+                        items2.empty();
+                        input = input.toLowerCase();
+                        array = teamMembers;
+                        list = items2;
+                        generateList = true;
+                    }
+                    searchTemp2 = $('#search2').val();
+                }break;
+            }
+            if (generateList) {
+                $.each(array, function( i, member )
+                {
+                    if (input == "" || (member.firstName + " " + member.lastName).toLowerCase().indexOf(input) >= 0) {
+                        //Item
+                        var item = $("<div/>")
+                            .addClass("item listItem")
+                            .appendTo(list);
+                        //Icon
+                        var icon = $("<i/>")
+                            .addClass("user icon user-icon")
+                            .appendTo(item);
+                        //Header
+                        var header = $("<h4/>")
+                            .addClass("ui header")
+                            .text(member.firstName + " " + member.lastName)
+                            .appendTo(item);
+                        //Role
+                        var role = $("<h5/>")
+                            .addClass("ui grey header")
+                            .text(member.role)
+                            .appendTo(header);
+                        //Id
+                        var id = $("<input/>")
+                            .attr({"type":"hidden", "value":member.id})
+                            .appendTo(item);
+                    }
+                });
+            }  
+        }
+    }
+
+    function saveChanges() {
+        let projectId = parseInt($('#projectsDrop').find("input").val());
+
+        $('#changesSaved').css("display", "none");
+        $('#error').css("display", "none");
+        
+        var requestData = {
+            ProjectId: projectId,
+            Employees: employees,
+            ProjectTeam: teamMembers
+        };
+        
+        $.ajax({
+            cache: false,
+            async: true,
+            type: "POST",
+            url: "/Project/SaveProjectTeam",
+            data: JSON.stringify(requestData),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            success: function(data) {
+                if (data.success) {
+                    //Check if employee was removed from project team
+                    let tempArray = origTeamMembers.slice();
+                    $.each(origTeamMembers, function( i, emp )
+                    {
+                        if (emp.projectId == projectId) {
+                            let arr = jQuery.grep(teamMembers, function(value) {
+                                return (value.id == emp.id);
+                            });
+                            if (arr.length <= 0) {
+                                tempArray.splice($.inArray(emp,tempArray), 1);
+                            }
+                        }
+                    });
+                    origTeamMembers = tempArray.slice();
+
+                    //Check if employee was added to project team
+                    tempArray = origTeamMembers.slice();
+                    $.each(teamMembers, function( i, emp )
+                    {
+                        let arr = jQuery.grep(origTeamMembers, function(value) {
+                            return (value.projectId == emp.projectId && value.id == emp.id);
+                        });
+                        if (arr.length <= 0) {
+                            tempArray.push(emp);
+                        }
+                    });
+                    origTeamMembers = tempArray.slice();
+
+                    $('#changesSaved').css("display", "");
+                    $('#error').css("display", "none");
+                } else {
+                    $('#error').css("display", "");
+                }
+            },
+            error: function(data) {
+                $('#error').css("display", "");
+            } 
+        });
+    }
+
+
+    //Dropdown
+    $('.ui.selection.dropdown').dropdown();
+
+    $('#dropDownEmployee').dropdown({
+        onChange: function(value, text, $choice){
+    }});
+    $('#dropDownProject').dropdown({
+        onChange: function(value, text, $choice){
+    }});
+
+    //Save button click
+    $('#saveButton').click(saveChanges);
+</script>

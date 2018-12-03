@@ -1,0 +1,58 @@
+﻿#projectTeamContainer {
+    width: 600px;
+    margin: auto;
+    padding: 20px 10px;
+}
+
+.fullWidth {
+    width: 100%;
+}
+
+.btnBottomMargin {
+    margin-bottom: 10px !important;
+}
+
+.member-table {
+    width: auto !important;
+    min-width: 10em !important;
+}
+
+.items {
+    width: 20em;
+    height: 100% !important;
+    min-height: 50px;
+    margin: 0 !important;
+    padding: 0.5em !important;
+    
+}
+
+.search-box {
+    width: 100% !important;
+    padding: 0.5em 0.5em 0 0.5em !important;
+}
+
+.listItem{
+    padding: 0.3em 0.5em 0.3em 0 !important;
+    margin: 2px 0 !important;
+    background-color: lightblue !important;
+    border: solid 1px rgba(34, 36, 38, 0.15) !important;
+    border-radius: 0.2em !important;
+}
+
+.items .item {
+    margin: 2px;
+    padding: 2px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.ui.list>.item>i.icon {
+    padding: .28em 0 0 0 !important;
+    color: darkslategray;
+    font-size: 2.8em !important;
+}
+
+.ui.table td {
+    height: 1em;
+    padding: 0 !important;
+}

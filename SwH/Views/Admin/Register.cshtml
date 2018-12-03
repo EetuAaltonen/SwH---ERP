@@ -1,0 +1,38 @@
+﻿<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="/css/views/register.css">
+
+<div id="fromContainer">
+    <p>Tänne ohjataan admin, joka voi lisätä uusia työntekijöitä</p>
+    <div class="ui huge header">Register a new employee<i class="lock icon"></i></div>
+
+    @Html.Partial("~/Views/InfoMessage.cshtml")
+
+    @using (Html.BeginForm("Register", "Admin"))
+    {
+        @Html.AntiForgeryToken()
+        <div class="ui form">
+            <div class="required field">
+                <label>First name</label>
+                <input type="text" name="firstname" required autofocus>
+            </div>
+            <div class="required field">
+                <label>Last name</label>
+                <input type="text" name="lastname" required>
+            </div>
+            <div class="required field">
+                <label>Role</label>
+                <input type="text" name="role" required>
+            </div>
+            <div class="required field">
+                <label>Username</label>
+                <input type="text" name="username" required>
+            </div>
+            <div class="required field">
+                <label>Password</label>
+                <input type="password" name="password" required>
+            </div>
+            <button class="ui button primary fullWidth btnBottomMargin" type="submit">Register</button>
+        </div>
+    }
+
+</div>

@@ -1,0 +1,162 @@
+﻿<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="/css/views/home.css">
+
+<h1 class="ui header"><i class="home icon"></i>Dashboard</h1>
+<div class="ui three column grid">
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="column">
+            <div class="ui segment">
+                <h3 class="ui header"><i class="remove bookmark icon"></i>Shortcuts</h3>
+                @Html.ActionLink("Users", "Users", "Admin", null, new { @class = "ui button primary fullWidth btnBottomMargin" })
+                @Html.ActionLink("Register New User", "Register", "Admin", null, new { @class = "ui button primary fullWidth btnBottomMargin" })
+            </div>
+        </div>
+    } else if (User.IsInRole("Head"))
+    {
+        <div class="column">
+            <div class="ui segment">
+                <h3 class="ui header"><i class="remove bookmark icon"></i>Shortcuts</h3>
+                @Html.ActionLink("Employees", "Employees", "Project", null, new { @class = "ui button primary fullWidth btnBottomMargin" })
+                @Html.ActionLink("All Projects", "Projects", "Project", null, new { @class = "ui button primary fullWidth btnBottomMargin" })
+                @Html.ActionLink("Manage Projects", "ManageProjects", "Project", null, new { @class = "ui button primary fullWidth btnBottomMargin" })
+                @Html.ActionLink("Project Summaries", "ProjectSummaries", "Project", null, new { @class = "ui button primary fullWidth btnBottomMargin" })
+            </div>
+        </div>
+    } else if (User.IsInRole("Manager"))
+    {
+        <div class="column">
+            <div class="ui segment">
+                <h3 class="ui header"><i class="remove bookmark icon"></i>Shortcuts</h3>
+                @Html.ActionLink("Manage Tasks", "ManageTasks", "Project", null, new { @class = "ui button primary fullWidth btnBottomMargin" })
+                @Html.ActionLink("Manage Project Teams", "ManageProjectTeams", "Project", null, new { @class = "ui button primary fullWidth btnBottomMargin" })
+                @Html.ActionLink("Projects", "Projects", "Project", null, new { @class = "ui button primary fullWidth btnBottomMargin" })
+                @Html.ActionLink("Project Summaries", "ProjectSummaries", "Project", null, new { @class = "ui button primary fullWidth btnBottomMargin" })
+            </div>
+        </div>
+    }
+
+    @if (!User.IsInRole("Admin"))
+    {
+        @if (!User.IsInRole("Head") && !User.IsInRole("Manager"))
+        {
+            //Employee's My Tasks preview
+            <div class="column">
+                <div class="ui segment">
+                    <h3 class="ui header"><i class="unordered list icon"></i>My Tasks Preview</h3>
+                    <div id="tasks" class="ui cards taskList"></div>
+                </div>
+            </div>
+        }
+        //Projects preview
+        <div class="column">
+            <div class="ui segment">
+                <h3 class="ui header"><i class="cubes icon"></i>Projects Preview</h3>
+                <div id="projects" class="ui cards taskList"></div>
+            </div>
+        </div>
+
+    }
+    
+    <div class="column">
+        <div class="ui segment">
+        <div class="ui grid">
+            
+        </div>
+        <h3 class="ui header"><i class="user icon"></i>@ViewData["User"]</h3>
+        <div class="ui vertical buttons profile-buttons">
+            @if (!User.IsInRole("Admin") && !User.IsInRole("Head") && !User.IsInRole("Manager"))
+            {
+                <a href="@Url.Action("MyTasks", "Project")" class="ui right labeled icon button">My Tasks<i class="right chevron icon"></i></a>
+                <a href="@Url.Action("ProjectSummaries", "Project")" class="ui right labeled icon button">Task Summaries<i class="right chevron icon"></i></a>
+                <a href="@Url.Action("Projects", "Project")" class="ui right labeled icon button">Projects<i class="right chevron icon"></i></a>
+            }
+            <a href="@Url.Action("ChangePassword", "Login")" class="ui right labeled icon button">Change Password<i class="right chevron icon"></i></a>
+            <a href="@Url.Action("Logout", "Login")" class="ui right labeled icon button">Logout<i class="right chevron icon"></i></a>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    $( document ).ready(function() {
+
+        var tasks = @Html.Raw(Json.Serialize(@ViewData["MyTasks"]));
+        if (tasks != null) {
+            generateTasks();
+            function generateTasks() {
+                let list = $("#tasks");
+                $.each(tasks, function( i, task )
+                {
+                    //Card
+                    let taskItem = $("<div/>")
+                        .addClass("card")
+                        .appendTo(list);
+                    //Content
+                    let content = $("<div/>")
+                        .addClass("content")
+                        .appendTo(taskItem);
+                    //Header
+                    let header = $("<div/>")
+                        .addClass("header")
+                        .text(task.name)
+                        .appendTo(content);
+                    //Project
+                    let project = $("<div/>")
+                        .addClass("meta")
+                        .text(task.project)
+                        .appendTo(content);
+                    //Expire
+                    let date = task.expires.substr(0, task.expires.indexOf('T')).split("-");
+                    let expire = $("<div/>")
+                        .addClass("description")
+                        .text(date[2] + "." + date[1] + "." + date[0])
+                        .appendTo(content);
+                });
+                //Link
+                let showMoreLink = $("<a/>")
+                    .attr("href","/Project/MyTasks")
+                    .text("Show more...")
+                    .appendTo(list);
+            }
+        }
+
+        //Haetaan tietokannasta
+        var projects = @Html.Raw(Json.Serialize(@ViewData["Projects"]));
+        
+        if (projects != null) {
+            generateProjects();
+            function generateProjects() {
+                let list = $("#projects");
+                $.each(projects, function( i, project )
+                {
+                    //Card
+                    let projectItem = $("<div/>")
+                        .addClass("card")
+                        .appendTo(list);
+                    //Content
+                    let content = $("<div/>")
+                        .addClass("content")
+                        .appendTo(projectItem);
+                    //Header
+                    let header = $("<div/>")
+                        .addClass("header")
+                        .text(project.name)
+                        .appendTo(content);
+                    //Expire
+                    //Expire
+                    let date = project.expires.substr(0, project.expires.indexOf('T')).split("-");
+                    let expire = $("<div/>")
+                        .addClass("meta")
+                        .text(date[2] + "." + date[1] + "." + date[0])
+                        .appendTo(content);
+                });
+                //Link
+                let showMoreLink = $("<a/>")
+                    .attr("href","/Project/Projects")
+                    .text("Show more...")
+                    .appendTo(list);
+            }
+        }
+    });
+</script>

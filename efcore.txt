@@ -1,0 +1,7 @@
+versiot oikeiksi nuget pakettien ja .net coren kanssa net core 2.1 ja pomelo ef core 2.1.2
+
+dotnet ef dbcontext scaffold  "server=212.66.193.182;database=swh;uid=user;password=pw" "Pomelo.EntityFrameworkCore.MySql" -o Models/EF/ -c SwH
+
+dotnet ef dbcontext scaffold  "server=;database=;uid=;password=" "Pomelo.EntityFrameworkCore.MySql" -o Models/EF/ -c scoretronicDbContext --force
+
+update loitsu

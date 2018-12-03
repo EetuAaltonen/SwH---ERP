@@ -1,0 +1,28 @@
+﻿
+@model SwH.Models.UserCredentials;
+
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="/css/views/login.css">
+
+<h1 id="loginHeader" class="ui header">Welcome to Software House ERP</h1>
+<div id="loginContainer">
+    <h2 class="ui header">Login <i class="lock icon"></i></h2>
+
+    @Html.Partial("~/Views/InfoMessage.cshtml")
+
+    @using (Html.BeginForm("Index", "Login"))
+    {
+        @Html.AntiForgeryToken()
+        <div class="ui form">
+            <div class="field">
+                <label>Username</label>
+                <input type="text" name="username" required autofocus>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input type="password" name="password" required>
+            </div>
+            <button class="ui button primary fullWidth btnBottomMargin" type="submit">Login</button>
+        </div>
+    }
+</div>

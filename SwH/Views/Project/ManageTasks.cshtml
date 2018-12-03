@@ -1,0 +1,76 @@
+﻿@model SwH.Models.ManageTasksViewModel
+
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="/css/views/managetasks.css">
+
+<div id="fromContainer">
+    <h1>Manager-roolissa oleva voi lisätä tehtäviä</h1>
+
+    @Html.Partial("~/Views/InfoMessage.cshtml")
+
+    @using (Html.BeginForm("ManageTasks", "Project"))
+    {
+        @Html.AntiForgeryToken()
+        <div class="ui form">
+            <div class="required field">
+                <label>Name</label>
+                <input type="text" name="taskName" required autofocus>
+            </div>
+            <div class="required field">
+                <label>Assign to</label>
+                <div id="dropDownEmployee" class="ui fluid search selection dropdown">
+                    <input type="hidden" name="userId">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select employee</div>
+                    <div class="menu">
+                        @if (Model != null)
+                        {
+                            @foreach (var user in Model.Employees)
+                            {
+                                <div class="item" data-value=@user.Id>@user.LastName @user.FirstName</div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="required field">
+                <label>Project</label>
+                <div id="dropDownProject" class="ui fluid search selection dropdown">
+                    <input type="hidden" name="projectId">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select project</div>
+                    <div class="menu">
+                        @if (Model != null)
+                        {
+                            @foreach (var project in Model.Projects)
+                            {
+                                <div class="item" data-value=@project.Id>@project.Name</div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="required field">
+                <label>Description</label>
+                <input type="text" name="descr" required>
+            </div>
+            <div class="field">
+                <input type="text" name="status" value="Queue">
+            </div>
+            <div class="required field">
+                <label>Expires</label>
+                <input type="date" name="expires" required>
+            </div>
+            <button class="ui button primary fullWidth btnBottomMargin" type="submit">Add New Task</button>
+        </div>
+    }
+</div>
+
+<script>
+    $('#dropDownEmployee').dropdown({
+        onChange: function(value, text, $choice){
+    }});
+    $('#dropDownProject').dropdown({
+        onChange: function(value, text, $choice){
+    }});
+</script>

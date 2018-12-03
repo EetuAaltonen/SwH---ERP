@@ -1,0 +1,39 @@
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">SwH</a>
+        </div>
+        <div class="ui secondary  menu">
+            <a class="active item" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+            @if (User.IsInRole("Manager"))
+            {
+                <a class="item" asp-controller="Project" asp-action="ManageTasks">Manage Tasks</a>
+                <a class="item" asp-controller="Project" asp-action="ManageProjectTeams">Manage Project Teams</a>
+                <a class="item" asp-controller="Project" asp-action="Projects">Projects</a>
+                <a class="item" asp-controller="Project" asp-action="ProjectSummaries">Project Summaries</a>
+            }
+            else if (User.IsInRole("Head"))
+            {
+                <a class="item" asp-controller="Project" asp-action="Employees">Employees</a>
+                <a class="item" asp-controller="Project" asp-action="Projects">All Projects</a>
+                <a class="item" asp-controller="Project" asp-action="ManageProjects">Manage Projects</a>
+                <a class="item" asp-controller="Project" asp-action="ProjectSummaries">Project Summaries</a>
+            }
+            else if (User.IsInRole("Admin"))
+            {
+                <a class="item" asp-controller="Admin" asp-action="Users">Users</a>
+                <a class="item" asp-controller="Admin" asp-action="Register">Register New User</a>
+            }
+            else
+            {
+                <a class="item" asp-controller="Project" asp-action="MyTasks">My Tasks</a>
+                <a class="item" asp-controller="Project" asp-action="ProjectSummaries">Task Summaries</a>
+                <a class="item" asp-controller="Project" asp-action="Projects">Projects</a>
+            }
+            <div class="right menu">
+                <a class="item" asp-controller="Login" asp-action="ChangePassword">Change Password</a>
+                <a class="ui item" asp-area="" asp-controller="Login" asp-action="Logout">Logout</a>
+            </div>
+        </div>
+    </div>
+</nav>

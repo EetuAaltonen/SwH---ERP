@@ -1,0 +1,30 @@
+@if (ViewData["Message"] != null) {
+    @switch (ViewData["MsgType"])
+    {
+        case "Error":
+        {
+            <div class="ui error message">
+                <div class="header">
+                    @ViewData["Message"]
+                </div>
+            </div>
+        }break;
+        case "Positive":
+        {
+            <div class="ui positive message">
+                <div class="header">
+                    @ViewData["Message"]
+                </div>
+            </div>
+        }break;
+        //Default == Info
+        default:
+        {
+            <div class="ui info message">
+                <div class="header">
+                    @ViewData["Message"]
+                </div>
+            </div>
+        }break;
+    }
+}

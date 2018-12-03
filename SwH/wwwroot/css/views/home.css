@@ -1,0 +1,32 @@
+﻿.fullWidth {
+    width: 100%;
+}
+
+.btnBottomMargin {
+    margin-bottom: 10px !important;
+}
+
+.ui.segment {
+    height: 30em;
+}
+
+.taskList {
+    margin: 1em 0 !important;
+    border-top: solid 1px rgba(34, 36, 38, 0.15);
+    border-bottom: solid 1px rgba(34, 36, 38, 0.15);
+    overflow-y: scroll;
+}
+
+.ui.cards {
+    max-height: 90%;
+}
+
+.ui.cards>.card {
+    width: 100% !important;
+    margin: 0.3em 0.4em 0.3em 0.1em !important;
+    background-color: #99d3e8 !important;
+}
+
+.profile-buttons {
+    width: 100%;
+}

@@ -1,0 +1,77 @@
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="/css/views/projects.css">
+
+<h1 class="ui header">Projektit joihin työntekijä kuuluu</h1>
+<div class="ui one column grid">
+    <div class="column">
+    <div class="ui segment">
+        <h3 class="ui header"><i class="cubes icon"></i>Projects</h3>
+        
+        @Html.Partial("~/Views/InfoMessage.cshtml")
+
+        <div class="ui grid headerColumn">
+            <div class="three column row headerRow">
+                <div class="column">Name</div>
+                <div class="column">Manager</div>
+                <div class="column">Expires</div>
+            </div>
+        </div>
+        <div id="projects" class="ui middle aligned divided list projectList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+    $( document ).ready(function() {
+
+        var projects = @Html.Raw(Json.Serialize(@ViewData["Projects"]));
+
+        generateProjects();
+        function generateProjects() {
+            let list = $("#projects");
+            $.each(projects, function( i, p )
+            {
+                //Item
+                let projectItem = $("<div/>")
+                    .addClass("item listItem")
+                    .appendTo(list);
+                //Grid
+                let projectGrid = $("<div/>")
+                    .addClass("ui grid")
+                    .appendTo(projectItem);
+                //Column Row
+                let columnRow = $("<div/>")
+                    .addClass("three column row")
+                    .appendTo(projectGrid);
+                //First Column
+                let frstCol = $("<div/>")
+                    .addClass("column")
+                    .appendTo(columnRow);
+                //Project Name
+                let projectName = $("<h4/>")
+                    .addClass("ui header")
+                    .text(p.name)
+                    .appendTo(frstCol);
+                //Second Column
+                let scnd = $("<div/>")
+                    .addClass("column")
+                    .appendTo(columnRow);
+                //Project Manager
+                let descr = $("<p/>")
+                    .addClass("column")
+                    .text(p.manager)
+                    .appendTo(scnd);
+                //Third Column
+                let thrd = $("<div/>")
+                    .addClass("column")
+                    .appendTo(columnRow);
+                //Expire
+                let date = p.expires.substr(0, p.expires.indexOf('T')).split("-");
+                let expire = $("<p/>")
+                    .addClass("column")
+                    .text(date[2] + "." + date[1] + "." + date[0])
+                    .appendTo(thrd);
+            });
+        }
+    });
+</script>

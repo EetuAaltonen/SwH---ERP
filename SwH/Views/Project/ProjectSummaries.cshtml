@@ -1,0 +1,159 @@
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="/css/views/projectsummaries.css">
+
+<h1 class="ui header">Projektien yhteenveto</h1>
+
+@Html.Partial("~/Views/InfoMessage.cshtml")
+
+<div id="projectsDrop" class="ui selection dropdown" onchange="updateProjectSummary()">
+    <input id="selectedProjectVal" type="hidden">
+    <i class="dropdown icon"></i>
+    <div id="selectedProject" class="default text">No Projects</div>
+    <div id="projectsDropdown" class="menu"></div>
+</div>
+<br><br>
+<div class="ui grid">
+    <div class="five wide column">
+        <div class="ui segment">
+            <h3 class="ui header"><i class="pie chart icon"></i>Percentages</h3>
+            <div id="ct-chart" class="ct-chart ct-square"></div>
+        </div>
+    </div>
+    <div class="ten wide column">
+        <div class="ui segment">
+            <h3 class="ui header"><i class="bar chart icon"></i>Numbers</h3>
+            <div><canvas id="canvas"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/chartist.min.js"></script>
+<script src="/js/chart.bundle.js"></script>
+
+<script>
+    var tasks = @Html.Raw(Json.Serialize(@ViewData["Tasks"]));
+    var pieData = {
+        series: [0, 0, 0, 0] //default
+    };
+    var barData = {
+            labels: ['Project 1'/*, 'Project 2'*/],
+            datasets: [{
+                label: 'Done',
+                backgroundColor: '#00b300',
+                data: [0] //default
+            }, {
+                label: 'In Progress',
+                backgroundColor: '#0086b3',
+                data: [0] //default
+            }, {
+                label: 'Paused',
+                backgroundColor: '#ff8000',
+                data: [0] //default
+            }, {
+                label: 'Queue',
+                backgroundColor: '#75a3a3',
+                data: [0] //default
+            }],
+        };
+
+    $( document ).ready(function() {        
+        window.onload = function() {
+            /*---------Chart 1---------*/
+            var sum = function(a, b) { return a + b };
+
+            window.chartPie = new Chartist.Pie('#ct-chart', pieData, {
+                labelInterpolationFnc: function(value) {
+                return Math.round(value / pieData.series.reduce(sum) * 100) + '%';
+                },
+            });
+
+            /*---------Chart 2---------*/
+            var ctx = document.getElementById('canvas').getContext('2d');
+            window.chartBar = new Chart(ctx, {
+                type: 'bar',
+                data: barData,
+                options: {
+                    title: {
+                        display: false,//true,
+                        text: "Task count"
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    responsive: true,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                userCallback: function(label, index, labels) {
+                                    // when the floored value is the same as the value we have a whole number
+                                    if (Math.floor(label) === label) {
+                                        return label;
+                                    }
+
+                                },
+                            }
+                        }],
+                    },
+                }
+            });
+
+            var projects = @Html.Raw(Json.Serialize(@ViewData["Projects"]));
+            generateProjectDropdown();    
+            function generateProjectDropdown() {
+                let options = "";
+                var dropdown = $("#projectsDropdown");
+                $.each(projects, function( i, project )
+                {
+                    let option = $("<div/>")
+                        .addClass("item")
+                        .attr("data-value", project.id)
+                        .text(project.name);
+                    if (i == 0) {
+                        $("#selectedProject").removeClass("default");
+                        $("#selectedProject").text(project.name);
+                        option.addClass("active").addClass("selected");
+                        $("#selectedProjectVal").attr("value", project.id)
+                        updateProjectSummary();
+                    }
+                    option.appendTo(dropdown);
+                });
+            }
+        };
+    });
+
+    function updateProjectSummary() {
+        let index = $("#selectedProjectVal").val();
+        //Pie data
+        let values = [];
+        let arr = jQuery.grep(tasks, function( t, i ) {
+            return ( t.status == "Done" && t.projectId == index );
+        });
+        values.push(arr.length);
+        arr = jQuery.grep(tasks, function( t, i ) {
+            return ( t.status == "In Progress" && t.projectId == index );
+        });
+        values.push(arr.length);
+        arr = jQuery.grep(tasks, function( t, i ) {
+            return ( t.status == "Paused" && t.projectId == index );
+        });
+        values.push(arr.length);
+        arr = jQuery.grep(tasks, function( t, i ) {
+            return ( t.status == "Queue" && t.projectId == index );
+        });
+        values.push(arr.length);
+
+        pieData.series = values;
+        window.chartPie.update();
+        
+        //Bar data
+        for (let i = 0; i < values.length; i++) {
+            barData.datasets[i].data = [values[i]];
+        }
+        window.chartBar.update();
+    }
+
+    //Dropdown
+    $('.ui.selection.dropdown').dropdown();
+</script>
